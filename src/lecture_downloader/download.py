@@ -23,6 +23,7 @@ class DownloadResult:
     media_id: str
     path: Path
     status: str
+    error: str | None = None
 
 
 @dataclass(frozen=True)
@@ -71,13 +72,20 @@ def download_audio_files(
                 _log(verbose, f"[{index}/{len(items)}] Downloading {url}")
                 response = request_context.get(url, timeout=60_000)
                 if not response.ok:
-                    raise RuntimeError(
-                        f"Download failed for {item.media_id}: HTTP {response.status} {response.status_text}"
+                    error = (
+                        f"Download failed for {item.media_id}: "
+                        f"HTTP {response.status} {response.status_text}"
                     )
+                    _log(verbose, error)
+                    results.append(DownloadResult(item.media_id, audio_path, "failed", error))
+                    continue
 
                 body = response.body()
                 if not body:
-                    raise RuntimeError(f"Download failed for {item.media_id}: empty response body")
+                    error = f"Download failed for {item.media_id}: empty response body"
+                    _log(verbose, error)
+                    results.append(DownloadResult(item.media_id, audio_path, "failed", error))
+                    continue
 
                 lecture_dir.mkdir(parents=True, exist_ok=True)
                 _write_bytes_atomically(audio_path, body)

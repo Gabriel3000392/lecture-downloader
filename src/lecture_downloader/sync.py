@@ -94,6 +94,8 @@ def sync_courses(
                 elif result.status == "skipped":
                     skipped.append(result.media_id)
                     skipped_paths.append(path)
+                elif result.status == "failed":
+                    errors.append(result.error or f"Download failed for {result.media_id}")
 
             if config.transcribe_on_sync:
                 transcription_results = transcriber(config, force=force, verbose=verbose)
