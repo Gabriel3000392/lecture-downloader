@@ -1,0 +1,15 @@
+courses:
+  emth117: b1629672-6a5f-4824-abb7-b33fdf7e0e9c
+  emth118: 2f5f182f-340f-4236-a190-d69a537c2dae
+  engr101: 9401f826-71d4-4c89-a842-a53fdd126d4a
+  chem114: 80588a39-c705-44cc-972e-e0ab4b6997b3
+base_url: https://echo360.net.au
+auth_state_path: .auth/echo360-state.json
+auth_state_paths:
+  emth118: .auth/echo360-emth118-state.json
+lectures_dir: /root/.openclaw/workspace/lectures
+headless: true
+whisper_model: small
+whisper_device: cuda
+whisper_compute_type: float16
+transcribe_on_sync: true
