@@ -50,6 +50,7 @@ def transcribe_course(
         media_id = _optional_str(metadata.get("media_id"))
         transcript_path = lecture_dir / "transcript.md"
         _log(verbose, f"Skipping existing {transcript_path}")
+        _delete_audio_after_transcript(lecture_dir, metadata, verbose=verbose)
         results.append(TranscriptionResult(media_id, transcript_path, "skipped"))
 
     if not to_transcribe:
@@ -68,6 +69,7 @@ def transcribe_course(
         segments = [_normalise_segment(segment) for segment in raw_segments]
         _write_transcript(config, lecture_dir, metadata, segments)
         _write_transcription_metadata(config, lecture_dir, metadata)
+        _delete_audio_after_transcript(lecture_dir, _read_metadata(lecture_dir), verbose=verbose)
         results.append(TranscriptionResult(media_id, transcript_path, "transcribed"))
 
     return results
@@ -203,6 +205,39 @@ def _write_transcription_metadata(
         "whisper_model": config.whisper_model,
         "whisper_device": config.whisper_device,
         "whisper_compute_type": config.whisper_compute_type,
+        "updated_at": _utc_now(),
+    }
+    temp_path = metadata_path.with_suffix(".json.part")
+    temp_path.write_text(json.dumps(updated, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    os.replace(temp_path, metadata_path)
+
+
+def _delete_audio_after_transcript(
+    lecture_dir: Path,
+    metadata: dict[str, Any],
+    *,
+    verbose: bool,
+) -> None:
+    audio_path = lecture_dir / "audio.mp3"
+    transcript_path = lecture_dir / "transcript.md"
+    if not audio_path.exists() or not transcript_path.exists():
+        return
+
+    audio_path.unlink()
+    _log(verbose, f"Deleted transcribed audio {audio_path}")
+    _write_audio_deleted_metadata(lecture_dir, metadata, audio_path)
+
+
+def _write_audio_deleted_metadata(
+    lecture_dir: Path,
+    metadata: dict[str, Any],
+    audio_path: Path,
+) -> None:
+    metadata_path = lecture_dir / "metadata.json"
+    updated = {
+        **metadata,
+        "audio_deleted_at": _utc_now(),
+        "audio_deleted_path": str(audio_path),
         "updated_at": _utc_now(),
     }
     temp_path = metadata_path.with_suffix(".json.part")

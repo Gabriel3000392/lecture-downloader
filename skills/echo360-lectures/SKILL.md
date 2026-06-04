@@ -52,15 +52,17 @@ Lecture outputs live under:
 ```text
 lectures/<COURSE>/<date>_<title>/
   audio.mp3
+  transcript.md
   metadata.json
 ```
 
-Future transcription and study outputs should be written beside the audio:
+`audio.mp3` is deleted automatically once `transcript.md` exists. Future study outputs should be written beside the transcript:
 
 ```text
-transcript.md
 summary.md
 flashcards.json
+quiz.json
+lecture-package.json
 ```
 
 When the user asks to summarize today's lectures, first run `sync`. It downloads missing audio and creates missing `transcript.md` files with local Whisper. Then use existing `summary.md` files if present; if summaries are missing, summarize from `transcript.md` and write `summary.md` beside the transcript when filesystem access allows it.

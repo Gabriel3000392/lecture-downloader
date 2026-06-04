@@ -26,13 +26,12 @@ lectures/
       metadata.json
 ```
 
-Future transcription and study outputs should live beside the audio:
+After transcription completes, `audio.mp3` is deleted and the transcript remains:
 
 ```text
 lectures/
   CHEM114/
     2026-05-13_kinetics/
-      audio.mp3
       transcript.md
       summary.md
       flashcards.json
@@ -43,6 +42,7 @@ lectures/
 
 Existing `audio.mp3` files are skipped unless you pass `--force`.
 Existing `transcript.md` files are also skipped unless you pass `--force`.
+When a transcript exists, any leftover `audio.mp3` is deleted during the next transcription pass.
 
 ## Config
 
@@ -299,8 +299,8 @@ Expected behavior:
 - progress logs appear while it opens Echo360 and checks menus
 - a final JSON object prints at the end
 - `ok` is `true` when the run succeeds
-- existing `audio.mp3` files are skipped on later runs
 - missing `transcript.md` files are created with local Whisper
+- `audio.mp3` is deleted once its lecture has a completed transcript
 
 If you see an error about `.auth/echo360-state.json`, refresh login on your computer and copy the new auth file to the LXC.
 

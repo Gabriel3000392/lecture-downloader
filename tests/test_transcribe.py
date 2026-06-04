@@ -102,9 +102,11 @@ def test_transcribe_course_writes_transcript_and_updates_metadata(tmp_path) -> N
     assert results[0].status == "transcribed"
     assert results[0].path == lecture_dir / "transcript.md"
     assert "Welcome to kinetics." in transcript
+    assert not (lecture_dir / "audio.mp3").exists()
     assert metadata["downloaded_at"] == "already-here"
     assert metadata["transcription_status"] == "transcribed"
     assert metadata["whisper_model"] == "small"
+    assert metadata["audio_deleted_path"].endswith("audio.mp3")
 
 
 def test_transcribe_course_skips_existing_transcript_without_loading_model(tmp_path) -> None:
@@ -126,6 +128,9 @@ def test_transcribe_course_skips_existing_transcript_without_loading_model(tmp_p
         raise AssertionError("model should not load when all transcripts already exist")
 
     results = transcribe_course(config, model_factory=fail_factory)
+    metadata = json.loads((lecture_dir / "metadata.json").read_text(encoding="utf-8"))
 
     assert results[0].status == "skipped"
     assert results[0].media_id == "0a2feded-d16e-4aa7-976c-27dd3044175d"
+    assert not (lecture_dir / "audio.mp3").exists()
+    assert metadata["audio_deleted_path"].endswith("audio.mp3")
